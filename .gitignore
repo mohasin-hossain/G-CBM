@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+
+# Keep shipped result CSVs only
+results/*
+!results/.gitkeep
+!results/classification_main.csv
+!results/selectivity_resnet50.csv

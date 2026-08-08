@@ -1,0 +1,187 @@
+{
+  "info": {
+    "program": "licensecheck",
+    "version": "2025.1.0",
+    "license": "MIT LICENSE"
+  },
+  "project_license": "APACHE LICENSE",
+  "packages": [
+    {
+      "name": "CRAFT-XAI",
+      "version": "0.0.3",
+      "size": 54437,
+      "homePage": "UNKNOWN",
+      "author": "Thomas FEL, Agustin PICARD, Louis B\u00e9thune, Thibaut BOISSIN",
+      "license": "MIT LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "CRAFT-XAI-0.0.3"
+    },
+    {
+      "name": "DGL",
+      "version": "2.4.0+cu118",
+      "size": 1044873839,
+      "homePage": "https://github.com/dmlc/dgl",
+      "author": "UNKNOWN",
+      "license": "APACHE SOFTWARE LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "DGL-2.4.0+cu118"
+    },
+    {
+      "name": "DILL",
+      "version": "0.4.1",
+      "size": 367659,
+      "homePage": "https://github.com/uqfoundation/dill",
+      "author": "Mike McKerns",
+      "license": "BSD LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "DILL-0.4.1"
+    },
+    {
+      "name": "MATPLOTLIB",
+      "version": "3.10.0",
+      "size": 21792280,
+      "homePage": "UNKNOWN",
+      "author": "John D. Hunter, Michael Droettboom",
+      "license": "PYTHON SOFTWARE FOUNDATION LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "MATPLOTLIB-3.10.0"
+    },
+    {
+      "name": "NUMPY",
+      "version": "1.26.4",
+      "size": 64581000,
+      "homePage": "https://numpy.org",
+      "author": "Travis E. Oliphant et al.",
+      "license": "BSD LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "NUMPY-1.26.4"
+    },
+    {
+      "name": "PANDAS",
+      "version": "2.2.3",
+      "size": 43848300,
+      "homePage": "https://pandas.pydata.org",
+      "author": "UNKNOWN",
+      "license": "BSD LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "PANDAS-2.2.3"
+    },
+    {
+      "name": "PILLOW",
+      "version": "11.0.0",
+      "size": 12553290,
+      "homePage": "UNKNOWN",
+      "author": "UNKNOWN",
+      "license": "CMU LICENSE _MIT-CMU_",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "PILLOW-11.0.0"
+    },
+    {
+      "name": "PYTORCH-LIGHTNING",
+      "version": "2.5.0",
+      "size": 2745975,
+      "homePage": "https://github.com/Lightning-AI/lightning",
+      "author": "Lightning AI et al.",
+      "license": "APACHE SOFTWARE LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "PYTORCH-LIGHTNING-2.5.0"
+    },
+    {
+      "name": "PYTORCHCV",
+      "version": "0.0.74",
+      "size": 2965364,
+      "homePage": "UNKNOWN",
+      "author": "UNKNOWN",
+      "license": "",
+      "licenseCompat": false,
+      "errorCode": 0,
+      "namever": "PYTORCHCV-0.0.74"
+    },
+    {
+      "name": "SCIKIT-LEARN",
+      "version": "1.6.1",
+      "size": 42206064,
+      "homePage": "UNKNOWN",
+      "author": "UNKNOWN",
+      "license": "BSD LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "SCIKIT-LEARN-1.6.1"
+    },
+    {
+      "name": "SCIPY",
+      "version": "1.15.1",
+      "size": 130519128,
+      "homePage": "UNKNOWN",
+      "author": "UNKNOWN",
+      "license": "BSD LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "SCIPY-1.15.1"
+    },
+    {
+      "name": "TORCH",
+      "version": "2.4.0+cu118",
+      "size": 1711847522,
+      "homePage": "https://pytorch.org/",
+      "author": "PyTorch Team",
+      "license": "BSD LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "TORCH-2.4.0+cu118"
+    },
+    {
+      "name": "TORCH-GEOMETRIC",
+      "version": "2.6.1",
+      "size": 3659937,
+      "homePage": "UNKNOWN",
+      "author": "UNKNOWN",
+      "license": "MIT LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "TORCH-GEOMETRIC-2.6.1"
+    },
+    {
+      "name": "TORCHAUDIO",
+      "version": "2.4.0+cu118",
+      "size": 12052600,
+      "homePage": "https://github.com/pytorch/audio",
+      "author": "Soumith Chintala, David Pollack, Sean Naren, Peter Goldsborough, Moto Hira, Caroline Chen, Jeff Hwang, Zhaoheng Ni, Xiaohui Zhang",
+      "license": "BSD LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "TORCHAUDIO-2.4.0+cu118"
+    },
+    {
+      "name": "TORCHMETRICS",
+      "version": "1.6.1",
+      "size": 3371605,
+      "homePage": "https://github.com/Lightning-AI/torchmetrics",
+      "author": "Lightning-AI et al.",
+      "license": "APACHE SOFTWARE LICENSE",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "TORCHMETRICS-1.6.1"
+    },
+    {
+      "name": "TORCHVISION",
+      "version": "0.19.0+cu118",
+      "size": 18538270,
+      "homePage": "https://github.com/pytorch/vision",
+      "author": "PyTorch Core Team",
+      "license": "BSD",
+      "licenseCompat": true,
+      "errorCode": 0,
+      "namever": "TORCHVISION-0.19.0+cu118"
+    }
+  ]
+}
+

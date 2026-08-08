@@ -1,0 +1,401 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:1a557bea-cbad-451d-9c89-4c96229543d5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-08-08T10:03:05.147136+00:00",
+    "component": {
+      "type": "application",
+      "name": "G-CBM",
+      "version": "0.1.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "description": "Graph-based Concept Bottleneck Models \u2014 declared Python dependencies (CUDA cu118 wheels)"
+    },
+    "properties": [
+      {
+        "name": "cbm:sbom:flavor",
+        "value": "cuda-cu118"
+      },
+      {
+        "name": "cbm:sbom:torch-index",
+        "value": "https://download.pytorch.org/whl/cu118"
+      },
+      {
+        "name": "cbm:sbom:dgl-index",
+        "value": "https://data.dgl.ai/wheels/torch-2.4/cu118/repo.html"
+      },
+      {
+        "name": "cbm:sbom:runtime",
+        "value": "pyxis-squash-isolated-venv"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "numpy",
+      "version": "1.26.4",
+      "bom-ref": "pkg:pypi/numpy@1.26.4",
+      "purl": "pkg:pypi/numpy@1.26.4",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ffa75af20b44f8dba823498024771d5ac50620e6915abac414251bd971b4529f"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pandas",
+      "version": "2.2.3",
+      "bom-ref": "pkg:pypi/pandas@2.2.3",
+      "purl": "pkg:pypi/pandas@2.2.3",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "86976a1c5b25ae3f8ccae3a5306e443569ee3c3faf444dfd0f41cda24667ad57"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scipy",
+      "version": "1.15.1",
+      "bom-ref": "pkg:pypi/scipy@1.15.1",
+      "purl": "pkg:pypi/scipy@1.15.1",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "21e10b1dd56ce92fba3e786007322542361984f8463c6d37f6f25935a5a6ef52"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scikit-learn",
+      "version": "1.6.1",
+      "bom-ref": "pkg:pypi/scikit-learn@1.6.1",
+      "purl": "pkg:pypi/scikit-learn@1.6.1",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "775da975a471c4f6f467725dff0ced5c7ac7bda5e9316b260225b48475279a1b"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pillow",
+      "version": "11.0.0",
+      "bom-ref": "pkg:pypi/pillow@11.0.0",
+      "purl": "pkg:pypi/pillow@11.0.0",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "MIT-CMU"
+          }
+        },
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: CMU License (MIT-CMU)"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1a61b54f87ab5786b8479f81c4b11f4d61702830354520837f8cc791ebba0f5f"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "matplotlib",
+      "version": "3.10.0",
+      "bom-ref": "pkg:pypi/matplotlib@3.10.0",
+      "purl": "pkg:pypi/matplotlib@3.10.0",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "Python-2.0"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "01d2b19f13aeec2e759414d3bfe19ddfb16b13a1250add08d46d5ff6f9be83c6"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "torch",
+      "version": "2.4.0+cu118",
+      "bom-ref": "pkg:pypi/torch@2.4.0+cu118",
+      "purl": "pkg:pypi/torch@2.4.0+cu118",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "80f75f98282dfcca50a013ce14ee6a4385680e1c15cb0e9b376612442137ead5"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "torchvision",
+      "version": "0.19.0+cu118",
+      "bom-ref": "pkg:pypi/torchvision@0.19.0+cu118",
+      "purl": "pkg:pypi/torchvision@0.19.0+cu118",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "120cee8ca4688a287fcaae69fcc4284b48c04ef8cc7a53461200d8c047ffe998"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "torchaudio",
+      "version": "2.4.0+cu118",
+      "bom-ref": "pkg:pypi/torchaudio@2.4.0+cu118",
+      "purl": "pkg:pypi/torchaudio@2.4.0+cu118",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d0cfc2c1ca93fe6c64223fc751d95845e0029983206c1698201ec96ca73f9e97"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pytorch-lightning",
+      "version": "2.5.0",
+      "bom-ref": "pkg:pypi/pytorch-lightning@2.5.0",
+      "purl": "pkg:pypi/pytorch-lightning@2.5.0",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "Apache-2.0"
+          }
+        },
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: Apache Software License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "dc891757eb0fc7e3812d7bb8f46cc74ef844500850ce83f65c71881d44008156"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "torchmetrics",
+      "version": "1.6.1",
+      "bom-ref": "pkg:pypi/torchmetrics@1.6.1",
+      "purl": "pkg:pypi/torchmetrics@1.6.1",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "Apache-2.0"
+          }
+        },
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: Apache Software License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c3090aa2341129e994c0a659abb6d4140ae75169a6ebf45bffc16c5cb553b38e"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "torch-geometric",
+      "version": "2.6.1",
+      "bom-ref": "pkg:pypi/torch-geometric@2.6.1",
+      "purl": "pkg:pypi/torch-geometric@2.6.1",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "MIT"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8faeb353f9655f7dbec44c5e0b44c721773bdfb279994da96b9b8b12fd30f427"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dgl",
+      "version": "2.4.0+cu118",
+      "bom-ref": "pkg:pypi/dgl@2.4.0+cu118",
+      "purl": "pkg:pypi/dgl@2.4.0+cu118",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: Apache Software License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "558d55c7d48dff60b8bbc708c266590f940072518c8933dce3c06b4e3661588e"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "Craft-xai",
+      "version": "0.0.3",
+      "bom-ref": "pkg:pypi/craft-xai@0.0.3",
+      "purl": "pkg:pypi/craft-xai@0.0.3",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "MIT"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "20dc71be83e80e4f68a05ddb46bec4ed652230f980e6ccb86df72922bd3b0f21"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pytorchcv",
+      "version": "0.0.74",
+      "bom-ref": "pkg:pypi/pytorchcv@0.0.74",
+      "purl": "pkg:pypi/pytorchcv@0.0.74",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "MIT"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9043ef0bd73870234361363522192be60a1938b836030415cc3dd85e254d3ac2"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dill",
+      "version": "0.4.1",
+      "bom-ref": "pkg:pypi/dill@0.4.1",
+      "purl": "pkg:pypi/dill@0.4.1",
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "BSD-3-Clause"
+          }
+        },
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1e1ce33e978ae97fcfcff5638477032b801c46c7c65cf717f95fbc2248f79a9d"
+        }
+      ]
+    }
+  ]
+}
