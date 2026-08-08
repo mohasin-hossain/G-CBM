@@ -23,6 +23,6 @@ SBOM generated with **CUDA 11.8** wheels matching Final pins (`torch`/`vision`/`
 | Scanner              | `licensecheck` 2025.1.0                      |
 | SBOM format          | CycloneDX 1.6 (`gcbm.cdx.json`)              |
 | Generated            | 2026-08-08 (CUDA cu118 declared-deps export) |
-| Release commit / tag | Fill in when you cut the public release      |
+| Release commit / tag | `v0.1.0` @ `a1b2c3d`                         |
 
 
