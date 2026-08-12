@@ -20,14 +20,14 @@ from dgl.dataloading import GraphDataLoader
 from sklearn.metrics import (accuracy_score, balanced_accuracy_score,
                              f1_score, roc_auc_score)
 
-from concepts import (
+from gcbm.concepts import (
     build_model_parts,
     load_craft_and_attach,
     resolve_backbone_weights,
 )
-from config import DATASETS, get_dataset_params
-from utils import _set_seed
-from gcbm_model import EGATClassifier, GAT_LightningModule
+from gcbm.config import DATASETS, get_dataset_params, resolve_under_repo
+from gcbm.utils import _set_seed
+from gcbm.gcbm_model import EGATClassifier, GAT_LightningModule
 
 
 def _craft_path(run_root: str, dataset: str) -> str:
@@ -60,7 +60,7 @@ def _build_split_graphs(dataset_key: str,
                         backbone: str = "resnet50",
                         backbone_weights: str | None = None):
     """Rebuild concept graphs for one split at the given τ; return (graph, label) pairs."""
-    from gcbm_graph import ConceptGraphDataset
+    from gcbm.gcbm_graph import ConceptGraphDataset
 
     spec = DATASETS[dataset_key]
     tdict = spec.build_transforms()
@@ -189,6 +189,12 @@ def main():
     ap.add_argument("--hidden-dim", type=int, default=128)
     ap.add_argument("--num-heads", type=int, default=None)
     args = ap.parse_args()
+
+    args.run_root = resolve_under_repo(args.run_root)
+    if args.craft_root is not None:
+        args.craft_root = resolve_under_repo(args.craft_root)
+    if args.out_dir is not None:
+        args.out_dir = resolve_under_repo(args.out_dir)
 
     device = (args.device
               if (args.device.startswith("cuda") and torch.cuda.is_available())

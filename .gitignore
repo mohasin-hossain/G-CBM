@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+*.egg-info/
+.eggs/
+build/
+dist/
 
 
 # Keep shipped result CSVs only

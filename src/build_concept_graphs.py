@@ -7,8 +7,8 @@ import json
 import numpy as np
 import torch
 from PIL import Image as PILImage
-from utils import _save_concepts, _reverse_preprocess
-from concepts import (
+from gcbm.utils import _save_concepts, _reverse_preprocess
+from gcbm.concepts import (
     build_model_parts,
     fit_craft_for_k,
     auto_select_k,
@@ -17,7 +17,7 @@ from concepts import (
     write_backbone_weights_meta,
     resolve_backbone_weights,
 )
-from config import DATASETS, default_output_dir
+from gcbm.config import DATASETS, default_output_dir, resolve_under_repo
 
 def parse_args():
     p = argparse.ArgumentParser(
@@ -93,11 +93,12 @@ def main():
     tdict = ds_spec.build_transforms()
     paths = ds_spec.resolve_paths()
 
-    craft_path = args.craft_path
     run_id = f"{args.dataset}"
 
-    current_dir = os.getcwd()
-    args.output_root = os.path.join(current_dir, args.output_root)
+    args.output_root = resolve_under_repo(args.output_root)
+    if args.craft_path is not None:
+        args.craft_path = resolve_under_repo(args.craft_path)
+    craft_path = args.craft_path
 
     craft_dir = os.path.join(args.output_root, args.dataset, "craft", run_id)
     os.makedirs(craft_dir, exist_ok=True)
@@ -112,7 +113,7 @@ def main():
         print("Concept discovery with Craft (NMF split)")
         images_nmf, labels_nmf, _ = ds_spec.load_split(paths, tdict, split="nmf")
         if images_nmf.numel() == 0:
-            raise RuntimeError("Loaded 0 images for NMF. Check CSV paths in config.py.")
+            raise RuntimeError("Loaded 0 images for NMF. Check CSV paths in gcbm/config.py.")
         g, h = build_model_parts(
             args.backbone, device=args.device, pretrained=True,
             backbone_weights=args.backbone_weights,
@@ -168,12 +169,12 @@ def main():
 
     if "build_graphs" in args.steps:
         if getattr(args, "concept_bottleneck_mlp_linear", False):
-            from cbm_graph import GRAPHS_SUBDIR, build_and_save_graphs_per_split
+            from gcbm.cbm_graph import GRAPHS_SUBDIR, build_and_save_graphs_per_split
             graphs_dir = os.path.join(
                 args.output_root, args.dataset, GRAPHS_SUBDIR, run_id
             )
         else:
-            from gcbm_graph import build_and_save_graphs_per_split
+            from gcbm.gcbm_graph import build_and_save_graphs_per_split
             graphs_dir = os.path.join(args.output_root, args.dataset, "graphs", run_id)
         os.makedirs(graphs_dir, exist_ok=True)
 

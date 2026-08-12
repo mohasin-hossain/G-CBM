@@ -18,9 +18,9 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from config import DATASETS, get_dataset_params
-from utils import _set_seed
-from gcbm_model import EGATClassifier, GAT_LightningModule
+from gcbm.config import DATASETS, get_dataset_params, resolve_under_repo
+from gcbm.utils import _set_seed
+from gcbm.gcbm_model import EGATClassifier, GAT_LightningModule
 
 
 def compute_alpha_nodegrad(device, gat_model, graph):
@@ -47,7 +47,7 @@ def _forward_with_masked_nodef(gat_model, graph, node_f_base, keep_idx):
 
 
 def _load_split(run_root: str, dataset: str, split: str, device: str):
-    from gcbm_graph import load_split
+    from gcbm.gcbm_graph import load_split
     return load_split(run_root, dataset, split, device)
 
 
@@ -206,6 +206,10 @@ def main():
     ap.add_argument("--hidden-dim", type=int, default=128)
     ap.add_argument("--num-heads", type=int, default=None)
     args = ap.parse_args()
+
+    args.run_root = resolve_under_repo(args.run_root)
+    if args.out_dir is not None:
+        args.out_dir = resolve_under_repo(args.out_dir)
 
     device = (args.device
               if (args.device.startswith("cuda") and torch.cuda.is_available())

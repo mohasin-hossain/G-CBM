@@ -1,7 +1,7 @@
 """G-CBM concept explanations for one image.
 
 Writes ``output_concept_explanation.png`` (localisation, importance bars,
-exemplars) and ``output_active_patches.png`` under the current working directory.
+exemplars) and ``output_active_patches.png`` under the repository root.
 """
 
 from __future__ import annotations
@@ -21,14 +21,21 @@ import torch
 import torch.nn.functional as F
 from PIL import Image, ImageDraw
 
-from concepts import (
+from gcbm.concepts import (
     build_model_parts,
     load_craft_and_attach,
     resolve_backbone_weights,
 )
-from config import DATASETS, default_output_dir, get_class_label, get_dataset_params
-from gcbm_graph import ConceptGraphDataset, infer_dims, load_split
-from gcbm_model import EGATClassifier, GAT_LightningModule
+from gcbm.config import (
+    DATASETS,
+    _repo_root,
+    default_output_dir,
+    get_class_label,
+    get_dataset_params,
+    resolve_under_repo,
+)
+from gcbm.gcbm_graph import ConceptGraphDataset, infer_dims, load_split
+from gcbm.gcbm_model import EGATClassifier, GAT_LightningModule
 
 mpl.rcParams.update({
     "font.size": 11,
@@ -200,7 +207,7 @@ def save_active_patches_row(
     fig.suptitle("Most active patches per concept",
                  fontsize=14, fontweight="bold", y=1.02)
     plt.tight_layout()
-    out_path = os.path.join(os.getcwd(), "output_active_patches.png")
+    out_path = os.path.join(_repo_root, "output_active_patches.png")
     plt.savefig(out_path, dpi=300, bbox_inches="tight", pad_inches=0.25)
     plt.close(fig)
     print(f"[INFO] Active-patches figure saved to {out_path}")
@@ -453,7 +460,7 @@ def explain_concepts(
                   ha="center", va="top", fontsize=11, transform=ax_c.transAxes)
     fig.add_subplot(gs_c[2, 0]).axis("off")
 
-    out_main = os.path.join(os.getcwd(), "output_concept_explanation.png")
+    out_main = os.path.join(_repo_root, "output_concept_explanation.png")
     plt.savefig(out_main, dpi=300, bbox_inches="tight", pad_inches=0.2)
     plt.close(fig)
     print(f"[INFO] Concept-explanation figure saved to {out_main}")
@@ -495,6 +502,8 @@ def main():
     ap.add_argument("--min-patch-separation", type=int, default=3)
     ap.add_argument("--floor-score-frac", type=float, default=0.15)
     args = ap.parse_args()
+
+    args.output_root = resolve_under_repo(args.output_root)
 
     explain_concepts(
         dataset_key=args.dataset,

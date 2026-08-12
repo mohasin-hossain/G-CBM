@@ -17,8 +17,8 @@ from torchvision.models import (
     mobilenet_v2,  MobileNet_V2_Weights,
 )
 
-from config import DATASETS, default_output_dir
-from utils import _set_seed
+from gcbm.config import DATASETS, default_output_dir, resolve_under_repo
+from gcbm.utils import _set_seed
 
 
 class ResNetLightning(pl.LightningModule):
@@ -130,8 +130,7 @@ def main():
               if args.device.startswith("cuda") and torch.cuda.is_available()
               else "cpu")
 
-    current_dir = os.getcwd()
-    args.output_root = os.path.join(current_dir, args.output_root)
+    args.output_root = resolve_under_repo(args.output_root)
 
     ds_spec = DATASETS[args.dataset]
     tdict = ds_spec.build_transforms()

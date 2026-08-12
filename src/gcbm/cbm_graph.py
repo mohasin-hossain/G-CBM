@@ -15,8 +15,8 @@ import numpy as np
 import torch
 from dgl.data import DGLDataset
 
-from concepts import build_model_parts, load_craft_and_attach
-from utils import _safe_argmax
+from .concepts import build_model_parts, load_craft_and_attach
+from .utils import _safe_argmax
 
 # Subdir under ``<output_root>/<dataset>/`` (parallel to ``graphs/<dataset>/``).
 GRAPHS_SUBDIR = "graphs_concept_bottleneck_mlp_linear"
@@ -154,7 +154,7 @@ def build_and_save_graphs_per_split(
     backbone_weights: Optional[str] = None,
     **_unused_kwargs,
 ):
-    from concepts import resolve_backbone_weights
+    from .concepts import resolve_backbone_weights
     ignore_list = ignore_list or []
     bw = resolve_backbone_weights(backbone_weights, craft_path)
     g, h = build_model_parts(

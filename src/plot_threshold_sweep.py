@@ -13,6 +13,8 @@ import matplotlib.ticker
 import matplotlib.pyplot as plt
 import numpy as np
 
+from gcbm.config import resolve_under_repo
+
 mpl.rcParams.update({
     "font.size":        11,
     "axes.titlesize":   13,
@@ -541,6 +543,13 @@ def main():
              "after eval with --split test. "
              "Ignored when --aggregated-root is set.")
     args = ap.parse_args()
+
+    if args.run_root is not None:
+        args.run_root = resolve_under_repo(args.run_root)
+    if args.aggregated_root is not None:
+        args.aggregated_root = resolve_under_repo(args.aggregated_root)
+    if args.out_dir is not None:
+        args.out_dir = resolve_under_repo(args.out_dir)
 
     if args.aggregated_root:
         agg_root = args.aggregated_root

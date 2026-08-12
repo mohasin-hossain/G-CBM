@@ -12,8 +12,8 @@ import torch.nn.functional as F
 from dgl.data import DGLDataset
 from typing import List, Optional
 
-from utils import _safe_argmax
-from concepts import build_model_parts, load_craft_and_attach
+from .utils import _safe_argmax
+from .concepts import build_model_parts, load_craft_and_attach
 
 
 class ConceptGraphDataset(DGLDataset):
@@ -186,7 +186,7 @@ def build_and_save_graphs_per_split(images: torch.Tensor,
     Extra kwargs are accepted for call-site compatibility with
     ``build_concept_graphs.py`` and ignored.
     """
-    from concepts import resolve_backbone_weights
+    from .concepts import resolve_backbone_weights
     ignore_list = ignore_list or []
     bw = resolve_backbone_weights(backbone_weights, craft_path)
     g, h = build_model_parts(

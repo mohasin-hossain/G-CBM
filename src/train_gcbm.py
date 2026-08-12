@@ -7,10 +7,10 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from dgl.dataloading import GraphDataLoader
-from gcbm_graph import load_split, infer_dims
-from gcbm_model import EGATClassifier, GAT_LightningModule
-from config import default_output_dir, get_dataset_params, DATASETS
-from utils import _set_seed
+from gcbm.gcbm_graph import load_split, infer_dims
+from gcbm.gcbm_model import EGATClassifier, GAT_LightningModule
+from gcbm.config import default_output_dir, get_dataset_params, DATASETS, resolve_under_repo
+from gcbm.utils import _set_seed
 
 @torch.no_grad()
 def evaluate(model, loader, device: str, num_classes: int):
@@ -74,8 +74,7 @@ def main():
     _set_seed(args.seed)
     device = args.device if (args.device.startswith("cuda") and torch.cuda.is_available()) else "cpu"
 
-    current_dir = os.getcwd()
-    args.output_root = os.path.join(current_dir, args.output_root)
+    args.output_root = resolve_under_repo(args.output_root)
 
     train_ds = load_split(args.output_root, args.dataset, "train", device)
     val_ds   = load_split(args.output_root, args.dataset, "validation", device)

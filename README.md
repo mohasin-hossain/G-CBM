@@ -59,11 +59,13 @@ Python 3.10+ recommended. A virtual environment is recommended:
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+pip install -e .
 ```
 
 Notes:
 
 - `dgl==2.4.0+cu118` expects a CUDA 11.8 wheel; install a matching [DGL](https://www.dgl.ai/pages/start.html) build for your platform if needed.
+- `pip install -e .` installs the `gcbm` package from `src/gcbm` (editable). Run CLIs from `src/` after that (see below).
 
 
 
@@ -98,9 +100,9 @@ datasets/
   imagenet/{train,val,test,nmf}.csv
 ```
 
-CSV format: image path (relative to that dataset’s `images_root`) and integer label. Edit `images_root` in [config.py](config.py) only if your layout differs.
+CSV format: image path (relative to that dataset’s `images_root`) and integer label. Edit `images_root` in [src/gcbm/config.py](src/gcbm/config.py) only if your layout differs.
 
-Artefacts after training:
+Artefacts after training (always under the **repository root**, even when CLIs are run from `src/`):
 
 ```
 concept_graph_data/<dataset>/
@@ -115,9 +117,11 @@ results/   # local eval outputs; shipped CSVs: classification_main.csv, selectiv
 
 ## Quickstart (HAM10000)
 
-Run from the repository root after placing data as above.
+After placing data as above, install deps, then run CLIs from `src/`:
 
 ```bash
+cd src
+
 # 1) Concepts + graphs at τ = 0
 python build_concept_graphs.py \
   --dataset ham10000 \
@@ -143,11 +147,13 @@ python explain.py \
   --patch-size 70 --stride-r 0.5 \
 ```
 
+Relative paths such as `concept_graph_data` resolve against the **repository root** (not `src/`).
+
 For the full paper protocol (validation τ calibration and retrain), see **Pipeline** below.
 
 ## Pipeline
 
-Published protocol:
+Published protocol (run from `src/` after `pip install -e .`):
 
 1. Discover concepts and build graphs at **τ = 0**
 2. Train G-CBM once on those graphs
@@ -155,7 +161,9 @@ Published protocol:
 4. Rebuild graphs at **τ** and **retrain** G-CBM
 5. Evaluate, plot, and explain using the τ model
 
-
+```bash
+cd src   # if not already there
+```
 
 ### 1. Concept discovery and graphs (τ = 0)
 
@@ -222,12 +230,12 @@ Replace `0.2` with your calibrated τ. Use this retrained checkpoint for evaluat
 python train_cnn.py --dataset ham10000 --backbone resnet50 --output-root concept_graph_data
 ```
 
-Optional: for domain-specific discovery, you can also pass the resulting
-`{dataset}_{backbone}_cnn.pt` into CRAFT / graphs / τ-sweep / explain via
-`--backbone-weights`. When unset, ImageNet / pytorchcv weights are used and
-existing pipelines are unchanged. If you fit CRAFT with weights, a
-`craft/*/backbone_weights.json` meta file is written so later steps can
-resolve the same encoder automatically.
+Optional: for domain-specific CRAFT, first train the CNN baseline, then pass the
+saved `{dataset}_{backbone}_cnn.pt` into concept discovery / graphs / τ-sweep /
+explain via `--backbone-weights`. When unset, ImageNet weights are
+used (existing pipelines unchanged). Fitting CRAFT with weights writes
+`craft/*/backbone_weights.json` so later steps can reuse the same encoder
+without repeating the flag.
 
 
 
@@ -273,7 +281,7 @@ python plot_fidelity.py --run-root concept_graph_data
 
 ### 9. Concept explanations
 
-Writes two PNGs in the current working directory:
+Writes two PNGs under the **repository root**:
 
 - `output_concept_explanation.png` — localisation, importance bars, exemplars
 - `output_active_patches.png` — most active patches per top concept
@@ -293,28 +301,30 @@ python explain.py \
 ## Repository layout
 
 ```
-config.py / utils.py              Dataset registry and helpers
-concepts.py                       Backbone split, NMF / CRAFT fitting
-build_concept_graphs.py           Concept discovery + graph build entry point
+src/gcbm/                         Installable package (pip install -e .)
+  config.py / utils.py            Dataset registry and helpers
+  concepts.py                     Backbone split, NMF / CRAFT fitting
+  gcbm_graph.py / gcbm_model.py   G-CBM graph builder and GAT classifier
+  cbm_graph.py                    Concept-bottleneck graphs (MLP / Linear)
+  mlp_cbm_model.py / linear_cbm_model.py
 
-gcbm_graph.py / gcbm_model.py     G-CBM graph builder and GAT classifier
-train_gcbm.py                     Train / evaluate G-CBM
+src/                              CLI entry points (cd src; python …)
+  build_concept_graphs.py         Concept discovery + graph build
+  train_gcbm.py                   Train / evaluate G-CBM
+  train_cnn.py                    CNN baselines
+  train_mlp_cbm.py / train_linear_cbm.py
+  eval_concept_quality.py         NMF vs PCA vs K-Means comparison
+  eval_threshold_sweep.py         F1 / AUC vs τ on a frozen checkpoint
+  eval_fidelity.py                Deletion / insertion faithfulness
+  plot_threshold_sweep.py
+  plot_fidelity.py
+  explain.py                      Concept localisation + active-patch figures
 
-train_cnn.py                      CNN baselines
-cbm_graph.py                      Concept-bottleneck graphs (MLP / Linear)
-mlp_cbm_model.py / linear_cbm_model.py
-train_mlp_cbm.py / train_linear_cbm.py
-
-eval_concept_quality.py           NMF vs PCA vs K-Means comparison
-eval_threshold_sweep.py           F1 / AUC vs τ on a frozen checkpoint
-eval_fidelity.py                  Deletion / insertion faithfulness
-plot_threshold_sweep.py
-plot_fidelity.py
-explain.py                        Concept localisation + active-patch figures
-
-concept_graph_data/               CRAFT artefacts + checkpoints
-results/                          Evaluation outputs 
-assets/                           Figures (pipeline.pdf)
+pyproject.toml                    Package metadata for editable install
+concept_graph_data/               CRAFT artefacts + checkpoints (repo root)
+results/                          Evaluation outputs (repo root)
+assets/                           Figures (pipeline.png)
+data/ / datasets/                 Images and CSV splits (repo root; not shipped)
 ```
 
 

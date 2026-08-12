@@ -1,4 +1,4 @@
-"""Train MLP-CBM on single-node concept-bottleneck graphs from cbm_graph."""
+"""Train Linear-CBM on single-node concept-bottleneck graphs from cbm_graph."""
 
 import json
 import os
@@ -15,11 +15,11 @@ from pytorch_lightning.callbacks import (
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from dgl.dataloading import GraphDataLoader
 
-from cbm_graph import load_split, infer_dims
-from mlp_cbm_model import ConceptBottleneckMLP
-from gcbm_model import GAT_LightningModule
-from config import default_output_dir, get_dataset_params, DATASETS
-from utils import _set_seed
+from gcbm.cbm_graph import load_split, infer_dims
+from gcbm.linear_cbm_model import ConceptBottleneckLinear
+from gcbm.gcbm_model import GAT_LightningModule
+from gcbm.config import default_output_dir, get_dataset_params, DATASETS, resolve_under_repo
+from gcbm.utils import _set_seed
 
 
 @torch.no_grad()
@@ -52,7 +52,7 @@ def evaluate(model, loader, device: str, num_classes: int):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Train MLP on concept-bottleneck z (single-node graphs)"
+        description="Train linear probe on concept-bottleneck z (single-node graphs)"
     )
     ap.add_argument("--dataset", required=True, choices=list(DATASETS.keys()))
     ap.add_argument("--output-root", type=str, default=default_output_dir)
@@ -62,13 +62,10 @@ def main():
     ap.add_argument("--patience", type=int, default=50)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--weight-decay", type=float, default=2e-4)
-    ap.add_argument("--hidden-dim", type=int, default=128)
-    ap.add_argument(
-        "--num-heads",
-        type=int,
-        default=None,
-        help="Unused; kept for CLI compatibility.",
-    )
+    ap.add_argument("--hidden-dim", type=int, default=128,
+                    help="Unused; kept for CLI compatibility.")
+    ap.add_argument("--num-heads", type=int, default=None,
+                    help="Unused; kept for CLI compatibility.")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--checkpoint-path", default=None)
     ap.add_argument("--save-model", action="store_true")
@@ -86,8 +83,7 @@ def main():
         args.device if (args.device.startswith("cuda") and torch.cuda.is_available()) else "cpu"
     )
 
-    current_dir = os.getcwd()
-    args.output_root = os.path.join(current_dir, args.output_root)
+    args.output_root = resolve_under_repo(args.output_root)
 
     train_ds = load_split(args.output_root, args.dataset, "train", device)
     val_ds = load_split(args.output_root, args.dataset, "validation", device)
@@ -105,7 +101,7 @@ def main():
 
     in_dim, num_classes, _ = infer_dims(train_ds)
 
-    clf = ConceptBottleneckMLP(
+    clf = ConceptBottleneckLinear(
         in_feats=in_dim,
         out_feats=args.hidden_dim,
         num_heads=args.num_heads,

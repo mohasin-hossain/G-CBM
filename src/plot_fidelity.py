@@ -15,6 +15,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+from gcbm.config import resolve_under_repo
+
 mpl.rcParams.update({
     "font.size":        11,
     "axes.titlesize":   13,
@@ -446,6 +448,10 @@ def main():
     ap.add_argument("--out-dir", default=None,
                     help="Output directory. Default: <run_root>/figures/")
     args = ap.parse_args()
+
+    args.run_root = resolve_under_repo(args.run_root)
+    if args.out_dir is not None:
+        args.out_dir = resolve_under_repo(args.out_dir)
 
     out_dir = args.out_dir or os.path.join(args.run_root, "figures")
 

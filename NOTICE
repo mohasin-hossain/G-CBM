@@ -5,6 +5,8 @@ This product includes software developed for the paper:
 "Beyond Heatmaps: Unsupervised Concept-Graph Reasoning for Interpretable
 Visual Explanation" (arXiv:2607.01416).
 
+The installable Python package lives at src/gcbm (Apache-2.0).
+
 Licensed under the Apache License, Version 2.0. See the LICENSE file.
 
 ================================================================================

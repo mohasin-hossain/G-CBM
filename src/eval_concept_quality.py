@@ -18,6 +18,7 @@ import faiss
 from sklearn.metrics import pairwise_distances
 import argparse
 import warnings
+from gcbm.config import resolve_under_repo
 warnings.filterwarnings("ignore")
 
 MODELS = ["mobilenet", "densenet", "resnet50"]
@@ -168,9 +169,8 @@ def main():
     ap.add_argument("--patch_size", type=int, default=70, help="Patch size")
     args = ap.parse_args()
 
-    current_dir = os.getcwd()
-    print(current_dir)
-    args.img_folder_dir = os.path.join(current_dir, args.img_folder_dir)
+    args.img_folder_dir = resolve_under_repo(args.img_folder_dir)
+    print(args.img_folder_dir)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 

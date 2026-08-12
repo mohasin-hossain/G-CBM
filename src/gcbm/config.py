@@ -9,15 +9,24 @@ from torchvision import transforms
 from torchvision.transforms import InterpolationMode
 from torchvision.transforms import functional as F
 
-from utils import ImageDataset, _tensors_from_loader
+from .utils import ImageDataset, _tensors_from_loader
 
-current_dir = os.getcwd()
-# Resolve CSV / image paths from this file so they work when cwd is not the repo root.
-_config_dir = os.path.dirname(os.path.abspath(__file__))
-_data_root = os.path.join(_config_dir, "data")
-default_output_dir = os.path.join(current_dir, "concept_graph_data")
-default_eval_dir = os.path.join(current_dir, "results")
-default_datasets_dir = os.path.join(_config_dir, "datasets")
+# Resolve paths from package location so data/artefacts stay at repo root
+# even when CLIs are run from src/.
+_pkg_dir = os.path.dirname(os.path.abspath(__file__))       # .../src/gcbm
+_src_dir = os.path.dirname(_pkg_dir)                        # .../src
+_repo_root = os.path.dirname(_src_dir)                      # repo root
+_data_root = os.path.join(_repo_root, "data")
+default_datasets_dir = os.path.join(_repo_root, "datasets")
+default_output_dir = os.path.join(_repo_root, "concept_graph_data")
+default_eval_dir = os.path.join(_repo_root, "results")
+
+
+def resolve_under_repo(path: str) -> str:
+    """Resolve a relative path against the repo root; leave absolute paths as-is."""
+    if os.path.isabs(path):
+        return path
+    return os.path.join(_repo_root, path)
 
 
 
