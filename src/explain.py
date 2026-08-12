@@ -225,7 +225,7 @@ def load_craft(dataset_key: str, device: str, output_root: str,
 
     When ``backbone_weights`` is unset, falls back to
     ``craft/<ds>/backbone_weights.json`` written at CRAFT fit time.
-    Otherwise uses ImageNet / pytorchcv defaults.
+    Otherwise uses ImageNet / torchvision defaults.
     """
     craft_dir = os.path.join(output_root, dataset_key, "craft", dataset_key)
     craft_path = os.path.join(craft_dir, f"craft_{dataset_key}.dill")
@@ -486,7 +486,7 @@ def main():
         "--backbone-weights", default=None,
         help="Optional fine-tuned CNN .pt used when CRAFT was fit. "
              "Default: read craft/*/backbone_weights.json if present, else "
-             "ImageNet / pytorchcv weights.",
+             "ImageNet / torchvision weights.",
     )
     ap.add_argument("--output-root", default=default_output_dir,
                     help="Root containing craft / graphs / models")

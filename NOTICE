@@ -47,10 +47,6 @@ inventories):
   - matplotlib — Matplotlib license (PSF-compatible)
     https://matplotlib.org/
 
-  - pytorchcv (imgclsmob) — MIT License
-    (PyPI metadata omits license field; upstream LICENSE is MIT —
-     see sbom/pytorchcv_upstream_MIT_LICENSE.txt)
-
 Full pins, licences, and SHA-256 hashes: see sbom/ (CycloneDX + licensecheck).
 
 ================================================================================
@@ -85,6 +81,21 @@ Tabulated metric CSVs under results/ are first-party evaluation summaries
 PRETRAINED WEIGHTS
 ================================================================================
 
-Pretrained backbone weights (e.g. torchvision ImageNet weights, pytorchcv)
-are downloaded by the user at runtime and remain subject to their upstream
-terms. They are not vendored in this repository.
+G-CBM uses CNN backbones whose architectures and default ImageNet-pretrained
+checkpoints are provided by third-party libraries (not redistributed here).
+Weights are downloaded by the user at runtime and remain subject to their
+upstream terms. This repository does not vendor .pt / .pth weight files.
+
+  - ResNet-50, DenseNet-201, MobileNet-V2 — via torchvision
+    (see torchvision / PyTorch licences in requirements.txt and sbom/).
+    Default checkpoints use torchvision Weights enums (ImageNet-1K).
+
+Fine-tuned checkpoints produced by train_cnn (e.g. {dataset}_{backbone}_cnn.pt)
+are user-generated artefacts derived from those backbones; they are not shipped
+in this repository.
+
+ImageNet-trained weights are distinct from the ImageNet *dataset* terms above:
+the G-CBM *source code* remains Apache-2.0, but use of ImageNet-derived weights
+may still be constrained by upstream weight and dataset policies. Obtain and
+use weights only under terms you accept.
+

@@ -3,7 +3,7 @@
 Official code for **[Beyond Heatmaps: Unsupervised Concept-Graph Reasoning for Interpretable Visual Explanation](https://arxiv.org/abs/2607.01416)**  
 (IJCAI-ECAI 2026 Workshop on Explainable Artificial Intelligence).
 
-**Links:** [Paper](https://arxiv.org/abs/2607.01416) · [PDF](https://arxiv.org/pdf/2607.01416)
+**Links:** [Paper (arXiv)](https://arxiv.org/abs/2607.01416) · [PDF (arXiv)](https://arxiv.org/pdf/2607.01416) · [PDF (this repo)](paper/G_CBM_IJCAI_ECAI_26.pdf)
 
 G-CBM discovers visual concepts with unsupervised NMF (via CRAFT), builds a per-image concept graph with a tunable filtering threshold τ, and classifies with a Graph Attention Network (GAT). Predictions come with concept selection, spatial grounding, and importance scores. Across ImageNet, HAM10000, PH2, and Derm7pt, G-CBM improves average AUC by **3.7% relative** over a ResNet-50 CNN baseline.
 
@@ -146,8 +146,6 @@ python explain.py \
   --backbone resnet50 \
   --patch-size 70 --stride-r 0.5 \
 ```
-
-Relative paths such as `concept_graph_data` resolve against the **repository root** (not `src/`).
 
 For the full paper protocol (validation τ calibration and retrain), see **Pipeline** below.
 
@@ -321,6 +319,7 @@ src/                              CLI entry points (cd src; python …)
   explain.py                      Concept localisation + active-patch figures
 
 pyproject.toml                    Package metadata for editable install
+paper/                            Paper PDF (G_CBM_IJCAI_ECAI_26.pdf)
 concept_graph_data/               CRAFT artefacts + checkpoints (repo root)
 results/                          Evaluation outputs (repo root)
 assets/                           Figures (pipeline.png)

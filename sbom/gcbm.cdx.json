@@ -351,27 +351,6 @@
     },
     {
       "type": "library",
-      "name": "pytorchcv",
-      "version": "0.0.74",
-      "bom-ref": "pkg:pypi/pytorchcv@0.0.74",
-      "purl": "pkg:pypi/pytorchcv@0.0.74",
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "MIT"
-          }
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "9043ef0bd73870234361363522192be60a1938b836030415cc3dd85e254d3ac2"
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "dill",
       "version": "0.4.1",
       "bom-ref": "pkg:pypi/dill@0.4.1",

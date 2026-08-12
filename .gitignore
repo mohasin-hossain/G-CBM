@@ -9,7 +9,7 @@ build/
 dist/
 
 
-# Keep shipped result CSVs only
+
 results/*
 !results/.gitkeep
 !results/classification_main.csv

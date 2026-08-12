@@ -31,7 +31,7 @@ def parse_args():
     p.add_argument(
         "--backbone-weights", default=None,
         help="Optional fine-tuned CNN .pt from train_cnn. Default: ImageNet / "
-             "pytorchcv weights. Unset keeps existing pipelines unchanged.",
+             "torchvision weights. Unset keeps existing pipelines unchanged.",
     )
     p.add_argument("--n-components", type=int, default=10)
     p.add_argument("--batch-size", type=int, default=64, help="CRAFT fitting batch size")

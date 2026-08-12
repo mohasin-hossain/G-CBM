@@ -47,8 +47,6 @@ def _infer_backbone_from_run_root(run_root: str) -> str:
         return "mobilenet_v2"
     if "bbdensenet201" in rid:
         return "densenet201"
-    if "bbresnet18" in rid:
-        return "resnet18"
     return "resnet50"
 
 
@@ -176,14 +174,14 @@ def main():
                     help="Root with craft .dill files (default: --run-root).")
     ap.add_argument(
         "--backbone", default="auto",
-        choices=["auto", "resnet18", "resnet50", "densenet201", "mobilenet_v2"],
+        choices=["auto", "resnet50", "densenet201", "mobilenet_v2"],
         help="CRAFT backbone; must match the craft .dill. "
              "'auto' uses a path heuristic from the parent artefact dirname.")
     ap.add_argument(
         "--backbone-weights", default=None,
         help="Optional fine-tuned CNN .pt used when CRAFT was fit. "
              "Default: read craft/*/backbone_weights.json if present, else "
-             "ImageNet / pytorchcv weights.")
+             "ImageNet / torchvision weights.")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--hidden-dim", type=int, default=128)

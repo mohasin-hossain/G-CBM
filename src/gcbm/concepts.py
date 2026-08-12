@@ -51,7 +51,7 @@ def _resize_classifier_for_state(model: nn.Module, backbone_name: str,
                                  state: Dict[str, Any],
                                  num_classes: Optional[int]) -> None:
     """Match classifier head size to checkpoint before load_state_dict."""
-    if backbone_name in ("resnet18", "resnet50"):
+    if backbone_name == "resnet50":
         key = "fc.weight"
         if key in state:
             out_features = int(state[key].shape[0])
@@ -91,8 +91,7 @@ def load_weights_into_backbone(model: nn.Module, backbone_name: str,
         raise FileNotFoundError(f"backbone weights not found: {weights_path}")
     ckpt = torch.load(weights_path, map_location="cpu", weights_only=False)
     state, num_classes = _extract_state_dict(ckpt)
-    if backbone_name != "resnet18":
-        _resize_classifier_for_state(model, backbone_name, state, num_classes)
+    _resize_classifier_for_state(model, backbone_name, state, num_classes)
     missing, unexpected = model.load_state_dict(state, strict=False)
     bad_missing = [k for k in missing if not k.startswith(("fc.", "classifier."))]
     if bad_missing:
@@ -158,33 +157,18 @@ def build_model_parts(backbone_name: str = "resnet50",
                       ) -> Tuple[nn.Module, nn.Module]:
     """Return (g, h): g maps images to a spatial feature map; h maps that map to logits.
 
-    Supported: resnet18, resnet50, densenet201, mobilenet_v2.
+    Supported: resnet50, densenet201, mobilenet_v2.
 
     backbone_weights:
       Optional path to a fine-tuned CNN checkpoint from ``train_cnn``
       (``{dataset}_{backbone}_cnn.pt``). When set, those weights replace the
-      default ImageNet / pytorchcv init. When None (default), behaviour is
+      default ImageNet / torchvision init. When None (default), behaviour is
       unchanged.
     """
     backbone_name = backbone_name.lower()
     use_pretrained = bool(pretrained) and not backbone_weights
 
-    if backbone_name == "resnet18":
-        from pytorchcv.model_provider import get_model as ptcv_get_model
-
-        ptcv_root = os.path.join(
-            os.environ.get("TORCH_HOME", os.path.expanduser("~/.torch")),
-            "pytorchcv",
-        )
-        net = ptcv_get_model("resnet18_cub", pretrained=use_pretrained, root=ptcv_root)
-        if backbone_weights:
-            load_weights_into_backbone(net, backbone_name, backbone_weights)
-        g = nn.Sequential(*list(net.features.children())[:-1]).to(device).eval()
-        fc = net.output
-        h = lambda x, _fc=fc: _fc(torch.mean(x, (2, 3)))
-        return g, h
-
-    elif backbone_name == "resnet50":
+    if backbone_name == "resnet50":
         weights = models.ResNet50_Weights.DEFAULT if use_pretrained else None
         model = models.resnet50(weights=weights)
         if backbone_weights:
@@ -219,7 +203,7 @@ def build_model_parts(backbone_name: str = "resnet50",
     else:
         raise ValueError(
             f"Unsupported backbone for Craft: {backbone_name!r}. "
-            "Choose from: resnet18, resnet50, densenet201, mobilenet_v2"
+            "Choose from: resnet50, densenet201, mobilenet_v2"
         )
 
 

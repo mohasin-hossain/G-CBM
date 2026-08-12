@@ -95,17 +95,6 @@
       "namever": "PYTORCH-LIGHTNING-2.5.0"
     },
     {
-      "name": "PYTORCHCV",
-      "version": "0.0.74",
-      "size": 2965364,
-      "homePage": "UNKNOWN",
-      "author": "UNKNOWN",
-      "license": "",
-      "licenseCompat": false,
-      "errorCode": 0,
-      "namever": "PYTORCHCV-0.0.74"
-    },
-    {
       "name": "SCIKIT-LEARN",
       "version": "1.6.1",
       "size": 42206064,
