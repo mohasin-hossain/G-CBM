@@ -50,12 +50,52 @@ inventories):
 Full pins, licences, and SHA-256 hashes: see sbom/ (CycloneDX + licensecheck).
 
 ================================================================================
-DATASETS (NOT SHIPPED IN THIS REPOSITORY)
+DATASETS
 ================================================================================
 
-Images and official dataset packs are NOT redistributed here. Users must
-obtain them from the upstream providers and accept those providers terms.
-The Apache-2.0 licence of this code does NOT grant rights to the datasets.
+The Apache-2.0 licence of this *code* does NOT automatically grant rights to
+every dataset. Use the shipped demo for licence-aligned runs; obtain paper
+datasets separately and accept those providers' terms.
+
+--------------------------------------------------------------------------------
+Shipped demo (CC BY 4.0) — MAVREC attribution
+--------------------------------------------------------------------------------
+
+  Title: Multiview Aerial Visual RECognition (MAVREC): Can Multi-view Improve
+         Aerial Visual Perception?
+  Authors: Aritra Dutta, Srijan Das, Jacob Nielsen, Rajatsubhra Chakraborty,
+           Mubarak Shah (CVPR 2024)
+  Licence: Creative Commons Attribution 4.0 International (CC BY 4.0)
+           https://creativecommons.org/licenses/by/4.0/
+  Upstream: https://mavrec.github.io/
+            https://huggingface.co/datasets/rjccv/MAVREC
+
+  This repository ships an *adapted* subset under datasets/mavrec_car_van/
+  (val-split bounding-box crops, resized JPEGs + CSV splits for car vs van),
+  not the full MAVREC release. Commercial use is permitted under CC BY 4.0
+  provided the creators are attributed. When using or redistributing the
+  subset, retain this attribution.
+
+  Preferred citation:
+
+  @InProceedings{Dutta_2024_CVPR,
+      author = {Dutta, Aritra and Das, Srijan and Nielsen, Jacob and
+                Chakraborty, Rajatsubhra and Shah, Mubarak},
+      title = {Multiview Aerial Visual RECognition (MAVREC): Can Multi-view
+               Improve Aerial Visual Perception?},
+      booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision
+                   and Pattern Recognition (CVPR)},
+      month = {June},
+      year = {2024},
+      pages = {22678-22690}
+  }
+
+--------------------------------------------------------------------------------
+Not shipped (paper / reproduction datasets)
+--------------------------------------------------------------------------------
+
+Official packs for the following are NOT redistributed here. Users must obtain
+them from the upstream providers.
 
   - HAM10000 — Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0).
     Commercial use is not permitted under that licence.
@@ -70,9 +110,9 @@ The Apache-2.0 licence of this code does NOT grant rights to the datasets.
   - ImageNet (including class subsets) — ImageNet Access Agreement:
     non-commercial research and educational purposes only.
 
-These dataset terms conflict with unrestricted commercial or military reuse
-of the *data*. The G-CBM *source code* remains Apache-2.0 and may be used
-with other data for which you have rights.
+Those dataset terms conflict with unrestricted commercial or military reuse
+of the *paper* data. The G-CBM *source code* remains Apache-2.0 and may be
+used with other data for which you have rights (including the MAVREC demo).
 
 Tabulated metric CSVs under results/ are first-party evaluation summaries
 (numbers only), not redistributions of dataset images.

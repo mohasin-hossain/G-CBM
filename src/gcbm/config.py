@@ -176,6 +176,35 @@ def _imagenet_load_split(paths, tdict, split):
     X, Y = _load_one_csv(paths["images_root"], csv_path, tfm)
     return X, Y, None
 
+
+def _mavrec_car_van_build_transforms():
+    return _imagenet_build_transforms()
+
+
+def _mavrec_car_van_resolve_paths():
+    """Shipped demo: images + CSVs live under datasets/mavrec_car_van/ (repo root)."""
+    return {
+        "images_root": os.path.join(default_datasets_dir, "mavrec_car_van", "images"),
+        "nmf_csv":   os.path.join(default_datasets_dir, "mavrec_car_van/nmf.csv"),
+        "train_csv": os.path.join(default_datasets_dir, "mavrec_car_van/train.csv"),
+        "val_csv":   os.path.join(default_datasets_dir, "mavrec_car_van/validation.csv"),
+        "test_csv":  os.path.join(default_datasets_dir, "mavrec_car_van/test.csv"),
+    }
+
+
+def _mavrec_car_van_load_split(paths, tdict, split):
+    if split == "nmf":
+        tfm = tdict["nmf"]
+        csv_path = paths["nmf_csv"]
+    elif split in ("train", "val", "test"):
+        tfm = tdict["eval"]
+        csv_path = paths[f"{split}_csv"]
+    else:
+        raise ValueError(f"Unknown split: {split}")
+    X, Y = _load_one_csv(paths["images_root"], csv_path, tfm)
+    return X, Y, None
+
+
 DATASETS: Dict[str, DatasetSpec] = {
     "ph2": DatasetSpec(
         "PH2", _ph2_build_transforms, _ph2_resolve_paths, _ph2_load_split,
@@ -193,6 +222,11 @@ DATASETS: Dict[str, DatasetSpec] = {
         "ImageNetSubset", _imagenet_build_transforms, _imagenet_resolve_paths, _imagenet_load_split,
         # Binary subset: n02701002=0, n04065272=1 (see README)
         class_names=["Ambulance", "Recreational Vehicle"],
+    ),
+    "mavrec_car_van": DatasetSpec(
+        "MAVREC-Car-Van", _mavrec_car_van_build_transforms,
+        _mavrec_car_van_resolve_paths, _mavrec_car_van_load_split,
+        class_names=["Car", "Van"],
     ),
 }
 
@@ -231,6 +265,11 @@ MODEL_CFG = {
         "num_heads": 6,
         "hidden_dim": 128,
         "batch_size": 128,
+    },
+    "mavrec_car_van": {
+        "num_heads": 6,
+        "hidden_dim": 128,
+        "batch_size": 64,
     },
 }
 

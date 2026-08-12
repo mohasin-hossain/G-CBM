@@ -71,20 +71,35 @@ Notes:
 
 ## Datasets
 
-**HAM10000**, **PH2**, **Derm7pt**, and an **ImageNet** binary subset (Ambulance vs Recreational Vehicle). Images are not shipped here; see [Licence](#licence) and [NOTICE](NOTICE) for upstream terms.
+### Demo (shipped): MAVREC Car vs Van
 
-### Download
+A small **licence-aligned** binary subset (**Car** = 0, **Van** = 1) is included under [`datasets/mavrec_car_van/`](datasets/mavrec_car_van/) (~1104 cropped JPEGs + CSVs). You can run the Quickstart without downloading anything else.
+
+Crops are adapted from [MAVREC](https://mavrec.github.io/) (Dutta, Das, Nielsen, Chakraborty, Shah; CVPR 2024), **CC BY 4.0** — full attribution and BibTeX in [NOTICE](NOTICE). To **regenerate** the subset from a full MAVREC download, see [`scripts/README.md`](scripts/README.md) and [`scripts/generate_mavrec_vehicle_crops.py`](scripts/generate_mavrec_vehicle_crops.py).
+
+### Paper datasets (not shipped)
+
+The paper also reports **HAM10000**, **PH2**, **Derm7pt**, and an **ImageNet** binary subset (Ambulance vs Recreational Vehicle). Those images are **not** in this repository (non-commercial / research-only upstream terms). See [Licence](#licence) and [NOTICE](NOTICE).
+
+Download (optional, for paper reproduction):
 
 - PH2: [Kaggle](https://www.kaggle.com/datasets/spacesurfer/ph2-dataset)
 - Derm7pt: [SFU](https://derm.cs.sfu.ca/Welcome.html)
 - HAM10000: [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DBW86T)
 - ImageNet subset: `wget https://image-net.org/data/winter21_whole/<wnid>.tar` (use `n02701002` for ambulance, `n04065272` for recreational vehicle)
 
-
-
 ### Layout
 
-Place **images** under `data/` and **CSV splits** under `datasets/`:
+**Demo (already in the repo):**
+
+```
+datasets/mavrec_car_van/
+  images/{car,van}/*.jpg
+  train.csv validation.csv test.csv nmf.csv all.csv
+  class_names.txt
+```
+
+**Paper datasets** (if you download them): place **images** under `data/` and **CSV splits** under `datasets/`:
 
 ```
 data/
@@ -100,7 +115,7 @@ datasets/
   imagenet/{train,val,test,nmf}.csv
 ```
 
-CSV format: image path (relative to that dataset’s `images_root`) and integer label. Edit `images_root` in [src/gcbm/config.py](src/gcbm/config.py) only if your layout differs.
+CSV format: image path (relative to that dataset’s `images_root`) and integer label. Edit paths in [src/gcbm/config.py](src/gcbm/config.py) only if your layout differs.
 
 Artefacts after training (always under the **repository root**, even when CLIs are run from `src/`):
 
@@ -115,16 +130,16 @@ results/   # local eval outputs; shipped CSVs: classification_main.csv, selectiv
 
 
 
-## Quickstart (HAM10000)
+## Quickstart (MAVREC Car vs Van demo)
 
-After placing data as above, install deps, then run CLIs from `src/`:
+Install deps, then run CLIs from `src/` (demo images/CSVs are already under `datasets/mavrec_car_van/`):
 
 ```bash
 cd src
 
 # 1) Concepts + graphs at τ = 0
 python build_concept_graphs.py \
-  --dataset ham10000 \
+  --dataset mavrec_car_van \
   --steps gen_concepts build_graphs \
   --auto-n-components \
   --candidates 6 7 8 9 10 12 16 \
@@ -134,18 +149,20 @@ python build_concept_graphs.py \
 
 # 2) Train G-CBM
 python train_gcbm.py \
-  --dataset ham10000 \
+  --dataset mavrec_car_van \
   --output-root concept_graph_data \
   --epochs 300
 
 # 3) Explain one image (after training)
 python explain.py \
-  --dataset ham10000 \
-  --image_path /path/to/image.jpg \
+  --dataset mavrec_car_van \
+  --image_path ../datasets/mavrec_car_van/images/car/<some_file>.jpg \
   --output-root concept_graph_data \
   --backbone resnet50 \
   --patch-size 70 --stride-r 0.5 \
 ```
+
+Relative paths such as `concept_graph_data` resolve against the **repository root** (not `src/`).
 
 For the full paper protocol (validation τ calibration and retrain), see **Pipeline** below.
 
@@ -167,7 +184,7 @@ cd src   # if not already there
 
 ```bash
 python build_concept_graphs.py \
-  --dataset ham10000 \
+  --dataset mavrec_car_van \
   --steps gen_concepts build_graphs \
   --auto-n-components \
   --candidates 6 7 8 9 10 12 16 \
@@ -182,7 +199,7 @@ python build_concept_graphs.py \
 
 ```bash
 python train_gcbm.py \
-  --dataset ham10000 \
+  --dataset mavrec_car_van \
   --output-root concept_graph_data \
   --epochs 300
 ```
@@ -196,7 +213,7 @@ Sweep τ through the τ = 0 checkpoint (graphs rebuilt in memory; no retraining 
 ```bash
 python eval_threshold_sweep.py \
   --run-root concept_graph_data \
-  --datasets ham10000 \
+  --datasets mavrec_car_van \
   --split val
 python plot_threshold_sweep.py --run-root concept_graph_data
 ```
@@ -207,15 +224,15 @@ Choose τ by best validation F1 / AUC (dataset- and backbone-specific).
 
 ```bash
 python build_concept_graphs.py \
-  --dataset ham10000 \
+  --dataset mavrec_car_van \
   --steps build_graphs \
-  --craft-path concept_graph_data/ham10000/craft/ham10000/craft_ham10000.dill \
+  --craft-path concept_graph_data/mavrec_car_van/craft/mavrec_car_van/craft_mavrec_car_van.dill \
   --patch-size 70 --stride-r 0.5 \
   --sim-threshold 0.2 \
   --output-root concept_graph_data
 
 python train_gcbm.py \
-  --dataset ham10000 \
+  --dataset mavrec_car_van \
   --output-root concept_graph_data \
   --epochs 300
 ```
@@ -225,7 +242,7 @@ Replace `0.2` with your calibrated τ. Use this retrained checkpoint for evaluat
 ### 5. CNN baselines
 
 ```bash
-python train_cnn.py --dataset ham10000 --backbone resnet50 --output-root concept_graph_data
+python train_cnn.py --dataset mavrec_car_van --backbone resnet50 --output-root concept_graph_data
 ```
 
 Optional: for domain-specific CRAFT, first train the CNN baseline, then pass the
@@ -243,14 +260,14 @@ Build single-node concept-bottleneck graphs at the same τ, then train:
 
 ```bash
 python build_concept_graphs.py \
-  --dataset ham10000 \
+  --dataset mavrec_car_van \
   --steps build_graphs \
   --concept-bottleneck-mlp-linear \
   --sim-threshold 0.2 \
   --output-root concept_graph_data
 
-python train_mlp_cbm.py --dataset ham10000 --output-root concept_graph_data
-python train_linear_cbm.py --dataset ham10000 --output-root concept_graph_data
+python train_mlp_cbm.py --dataset mavrec_car_van --output-root concept_graph_data
+python train_linear_cbm.py --dataset mavrec_car_van --output-root concept_graph_data
 ```
 
 
@@ -286,12 +303,12 @@ Writes two PNGs under the **repository root**:
 
 ```bash
 python explain.py \
-  --dataset ph2 \
-  --image_path /path/to/image.jpg \
+  --dataset mavrec_car_van \
+  --image_path ../datasets/mavrec_car_van/images/car/<some_file>.jpg \
   --output-root concept_graph_data \
   --backbone resnet50 \
   --patch-size 70 --stride-r 0.5 \
-  --true-class 1
+  --true-class 0
 ```
 
 
@@ -318,12 +335,14 @@ src/                              CLI entry points (cd src; python …)
   plot_fidelity.py
   explain.py                      Concept localisation + active-patch figures
 
+scripts/                          Optional MAVREC crop regenerator + docs
+datasets/mavrec_car_van/          Shipped CC BY 4.0 demo (images + CSVs)
 pyproject.toml                    Package metadata for editable install
 paper/                            Paper PDF (G_CBM_IJCAI_ECAI_26.pdf)
 concept_graph_data/               CRAFT artefacts + checkpoints (repo root)
 results/                          Evaluation outputs (repo root)
 assets/                           Figures (pipeline.png)
-data/ / datasets/                 Images and CSV splits (repo root; not shipped)
+data/ / datasets/                 Optional paper-dataset images / CSVs (not shipped)
 ```
 
 
@@ -348,5 +367,5 @@ This project's **source code** is licensed under the **Apache License 2.0** — 
 
 Third-party dependency inventory (CycloneDX SBOM) is under [sbom/](sbom/).
 
-**Datasets are not covered by Apache-2.0.** HAM10000, PH2, Derm7pt, and ImageNet have non-commercial / research-only (or equivalent) upstream terms. This repository does **not** redistribute those images; you must accept the providers' terms yourself. See [NOTICE](NOTICE) for details.
+**Datasets are not covered by Apache-2.0.** The shipped demo under [`datasets/mavrec_car_van/`](datasets/mavrec_car_van/) is an adapted MAVREC subset under **CC BY 4.0** (creators: Dutta et al., CVPR 2024; full attribution + BibTeX in [NOTICE](NOTICE)). Paper datasets (HAM10000, PH2, Derm7pt, ImageNet) remain non-commercial / research-only upstream terms and are **not** redistributed here.
 
