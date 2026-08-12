@@ -222,6 +222,13 @@ Replace `0.2` with your calibrated τ. Use this retrained checkpoint for evaluat
 python train_cnn.py --dataset ham10000 --backbone resnet50 --output-root concept_graph_data
 ```
 
+Optional: for domain-specific discovery, you can also pass the resulting
+`{dataset}_{backbone}_cnn.pt` into CRAFT / graphs / τ-sweep / explain via
+`--backbone-weights`. When unset, ImageNet / pytorchcv weights are used and
+existing pipelines are unchanged. If you fit CRAFT with weights, a
+`craft/*/backbone_weights.json` meta file is written so later steps can
+resolve the same encoder automatically.
+
 
 
 ### 6. MLP-CBM / Linear-CBM ablations

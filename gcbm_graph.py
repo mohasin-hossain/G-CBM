@@ -179,14 +179,18 @@ def build_and_save_graphs_per_split(images: torch.Tensor,
                                     ignore_list: Optional[List[int]] = None,
                                     coverage_threshold: float = 0.0,
                                     sim_threshold: float = 0.0,
+                                    backbone_weights: Optional[str] = None,
                                     **_unused_kwargs):
     """Build graphs for one split and save them as a `.dgl` file.
 
     Extra kwargs are accepted for call-site compatibility with
     ``build_concept_graphs.py`` and ignored.
     """
+    from concepts import resolve_backbone_weights
     ignore_list = ignore_list or []
-    g, h = build_model_parts(backbone_name, device=device, pretrained=True)
+    bw = resolve_backbone_weights(backbone_weights, craft_path)
+    g, h = build_model_parts(
+        backbone_name, device=device, pretrained=True, backbone_weights=bw)
     craft = load_craft_and_attach(craft_path, g, h)
 
     ds = ConceptGraphDataset(

@@ -20,7 +20,11 @@ from dgl.dataloading import GraphDataLoader
 from sklearn.metrics import (accuracy_score, balanced_accuracy_score,
                              f1_score, roc_auc_score)
 
-from concepts import build_model_parts, load_craft_and_attach
+from concepts import (
+    build_model_parts,
+    load_craft_and_attach,
+    resolve_backbone_weights,
+)
 from config import DATASETS, get_dataset_params
 from utils import _set_seed
 from gcbm_model import EGATClassifier, GAT_LightningModule
@@ -53,7 +57,8 @@ def _build_split_graphs(dataset_key: str,
                         patch_size: int, stride_r: float,
                         sim_threshold: float, split: str,
                         craft_root: str | None = None,
-                        backbone: str = "resnet50"):
+                        backbone: str = "resnet50",
+                        backbone_weights: str | None = None):
     """Rebuild concept graphs for one split at the given τ; return (graph, label) pairs."""
     from gcbm_graph import ConceptGraphDataset
 
@@ -64,9 +69,11 @@ def _build_split_graphs(dataset_key: str,
     if images.numel() == 0:
         return []
 
-    g, h = build_model_parts(backbone, device=device, pretrained=True)
-    craft = load_craft_and_attach(
-        _craft_path(craft_root or run_root, dataset_key), g, h)
+    craft_file = _craft_path(craft_root or run_root, dataset_key)
+    bw = resolve_backbone_weights(backbone_weights, craft_file)
+    g, h = build_model_parts(
+        backbone, device=device, pretrained=True, backbone_weights=bw)
+    craft = load_craft_and_attach(craft_file, g, h)
 
     ds = ConceptGraphDataset(
         images=images.to(device), y=labels.to(device), masks=None,
@@ -172,6 +179,11 @@ def main():
         choices=["auto", "resnet18", "resnet50", "densenet201", "mobilenet_v2"],
         help="CRAFT backbone; must match the craft .dill. "
              "'auto' uses a path heuristic from the parent artefact dirname.")
+    ap.add_argument(
+        "--backbone-weights", default=None,
+        help="Optional fine-tuned CNN .pt used when CRAFT was fit. "
+             "Default: read craft/*/backbone_weights.json if present, else "
+             "ImageNet / pytorchcv weights.")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--hidden-dim", type=int, default=128)
@@ -239,7 +251,8 @@ def main():
                     patch_size=args.patch_size,
                     stride_r=args.stride_r, sim_threshold=tau,
                     split=args.split, craft_root=craft_root,
-                    backbone=backbone)
+                    backbone=backbone,
+                    backbone_weights=args.backbone_weights)
                 if not pairs:
                     print(f"    [skip] no graphs at τ={tau}")
                     continue

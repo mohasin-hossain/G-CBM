@@ -21,7 +21,11 @@ import torch
 import torch.nn.functional as F
 from PIL import Image, ImageDraw
 
-from concepts import build_model_parts, load_craft_and_attach
+from concepts import (
+    build_model_parts,
+    load_craft_and_attach,
+    resolve_backbone_weights,
+)
 from config import DATASETS, default_output_dir, get_class_label, get_dataset_params
 from gcbm_graph import ConceptGraphDataset, infer_dims, load_split
 from gcbm_model import EGATClassifier, GAT_LightningModule
@@ -207,12 +211,24 @@ def load_eval_transform(dataset_key: str):
     return DATASETS[dataset_key].build_transforms()["eval"]
 
 
-def load_craft(dataset_key: str, device: str, output_root: str, backbone: str = "resnet50"):
-    g, h = build_model_parts(backbone_name=backbone, device=device, pretrained=True)
+def load_craft(dataset_key: str, device: str, output_root: str,
+               backbone: str = "resnet50",
+               backbone_weights: Optional[str] = None):
+    """Rebuild g/h and attach to the saved light Craft.
+
+    When ``backbone_weights`` is unset, falls back to
+    ``craft/<ds>/backbone_weights.json`` written at CRAFT fit time.
+    Otherwise uses ImageNet / pytorchcv defaults.
+    """
     craft_dir = os.path.join(output_root, dataset_key, "craft", dataset_key)
     craft_path = os.path.join(craft_dir, f"craft_{dataset_key}.dill")
     if not os.path.isfile(craft_path):
         raise FileNotFoundError(f"Craft not found: {craft_path}")
+    bw = resolve_backbone_weights(backbone_weights, craft_path)
+    g, h = build_model_parts(
+        backbone_name=backbone, device=device, pretrained=True,
+        backbone_weights=bw,
+    )
     return load_craft_and_attach(craft_path, g, h), craft_dir
 
 
@@ -260,12 +276,15 @@ def build_graph_from_single_image(dataset_key: str, image_path: str, device: str
 def _compute_concepts(dataset_key: str, image_path: str, device: str,
                       backbone: str, output_root: str,
                       patch_size: int, stride_r: float,
-                      top_k_max: int, min_concept_weight: float):
+                      top_k_max: int, min_concept_weight: float,
+                      backbone_weights: Optional[str] = None):
     """Forward one image through G-CBM; return concept ranking + patch scores."""
     train_ds = load_split(output_root, dataset_key, "train", device=device)
     in_dim, num_classes, _ = infer_dims(train_ds)
 
-    craft, craft_dir = load_craft(dataset_key, device, output_root, backbone=backbone)
+    craft, craft_dir = load_craft(
+        dataset_key, device, output_root, backbone=backbone,
+        backbone_weights=backbone_weights)
     gat_model = load_trained_gat(dataset_key, device, output_root, in_dim, num_classes)
     graph, patches_U, image_pil = build_graph_from_single_image(
         dataset_key, image_path, device, craft, patch_size, stride_r)
@@ -322,6 +341,7 @@ def explain_concepts(
     max_distinct_patches_per_concept: int = 4,
     min_patch_separation: int = 3,
     floor_score_frac: float = 0.15,
+    backbone_weights: Optional[str] = None,
 ):
     """Write explanation and active-patch PNGs for one image."""
     (image_pil, craft_dir, patch_importance, patches_U,
@@ -330,6 +350,7 @@ def explain_concepts(
      pred_idx, pred_conf) = _compute_concepts(
         dataset_key, image_path, device, backbone, output_root,
         patch_size, stride_r, top_k_max, min_concept_weight,
+        backbone_weights=backbone_weights,
     )
     top_k = len(top_concepts)
     patch_importance_np = patch_importance.detach().cpu().numpy()
@@ -454,6 +475,12 @@ def main():
     ap.add_argument("--image_path", required=True, type=str)
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--backbone", default="resnet50")
+    ap.add_argument(
+        "--backbone-weights", default=None,
+        help="Optional fine-tuned CNN .pt used when CRAFT was fit. "
+             "Default: read craft/*/backbone_weights.json if present, else "
+             "ImageNet / pytorchcv weights.",
+    )
     ap.add_argument("--output-root", default=default_output_dir,
                     help="Root containing craft / graphs / models")
     ap.add_argument("--patch-size", type=int, default=70)
@@ -483,6 +510,7 @@ def main():
         max_distinct_patches_per_concept=args.max_distinct_patches_per_concept,
         min_patch_separation=args.min_patch_separation,
         floor_score_frac=args.floor_score_frac,
+        backbone_weights=args.backbone_weights,
     )
 
 

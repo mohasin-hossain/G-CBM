@@ -3,7 +3,7 @@
 import os
 import dill
 import json
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Any
 import torch
 import torch.nn as nn
 import torchvision.models as models
@@ -12,14 +12,163 @@ from collections import Counter
 from craft.craft_torch import Craft, torch_to_numpy
 
 
+BACKBONE_WEIGHTS_META = "backbone_weights.json"
+
+
+def _strip_module_prefix(state: Dict[str, Any], prefix: str) -> Dict[str, Any]:
+    if not state:
+        return state
+    if all(k.startswith(prefix) for k in state):
+        n = len(prefix)
+        return {k[n:]: v for k, v in state.items()}
+    return state
+
+
+def _extract_state_dict(ckpt: Any) -> Tuple[Dict[str, Any], Optional[int]]:
+    """Parse train_cnn .pt / Lightning ckpt into (state_dict, num_classes?)."""
+    num_classes = None
+    if not isinstance(ckpt, dict):
+        raise ValueError("Checkpoint must be a dict (state_dict or wrapped .pt).")
+
+    if "num_classes" in ckpt and isinstance(ckpt["num_classes"], int):
+        num_classes = int(ckpt["num_classes"])
+
+    if "state_dict" in ckpt and isinstance(ckpt["state_dict"], dict):
+        state = ckpt["state_dict"]
+    elif "model" in ckpt and isinstance(ckpt["model"], dict):
+        state = ckpt["model"]
+    else:
+        state = {k: v for k, v in ckpt.items() if torch.is_tensor(v)}
+        if not state:
+            raise ValueError("Could not find a tensor state_dict in checkpoint.")
+
+    state = _strip_module_prefix(state, "model.")
+    state = _strip_module_prefix(state, "module.")
+    return state, num_classes
+
+
+def _resize_classifier_for_state(model: nn.Module, backbone_name: str,
+                                 state: Dict[str, Any],
+                                 num_classes: Optional[int]) -> None:
+    """Match classifier head size to checkpoint before load_state_dict."""
+    if backbone_name in ("resnet18", "resnet50"):
+        key = "fc.weight"
+        if key in state:
+            out_features = int(state[key].shape[0])
+        elif num_classes is not None:
+            out_features = num_classes
+        else:
+            return
+        if model.fc.out_features != out_features:
+            model.fc = nn.Linear(model.fc.in_features, out_features)
+    elif backbone_name == "densenet201":
+        key = "classifier.weight"
+        if key in state:
+            out_features = int(state[key].shape[0])
+        elif num_classes is not None:
+            out_features = num_classes
+        else:
+            return
+        if model.classifier.out_features != out_features:
+            model.classifier = nn.Linear(model.classifier.in_features, out_features)
+    elif backbone_name == "mobilenet_v2":
+        key = "classifier.1.weight"
+        if key in state:
+            out_features = int(state[key].shape[0])
+        elif num_classes is not None:
+            out_features = num_classes
+        else:
+            return
+        if model.classifier[1].out_features != out_features:
+            model.classifier[1] = nn.Linear(
+                model.classifier[1].in_features, out_features)
+
+
+def load_weights_into_backbone(model: nn.Module, backbone_name: str,
+                               weights_path: str) -> None:
+    """Load a fine-tuned CNN checkpoint (from train_cnn) into ``model``."""
+    if not os.path.isfile(weights_path):
+        raise FileNotFoundError(f"backbone weights not found: {weights_path}")
+    ckpt = torch.load(weights_path, map_location="cpu", weights_only=False)
+    state, num_classes = _extract_state_dict(ckpt)
+    if backbone_name != "resnet18":
+        _resize_classifier_for_state(model, backbone_name, state, num_classes)
+    missing, unexpected = model.load_state_dict(state, strict=False)
+    bad_missing = [k for k in missing if not k.startswith(("fc.", "classifier."))]
+    if bad_missing:
+        raise RuntimeError(
+            f"Failed loading backbone weights from {weights_path}: "
+            f"missing keys {bad_missing[:8]}{'...' if len(bad_missing) > 8 else ''}"
+        )
+    if unexpected:
+        print(f"[warn] unexpected keys when loading {weights_path}: "
+              f"{unexpected[:8]}{'...' if len(unexpected) > 8 else ''}")
+    print(f"[INFO] Loaded backbone weights from {weights_path}")
+
+
+def write_backbone_weights_meta(craft_dir: str, weights_path: str,
+                                backbone_name: str) -> str:
+    """Persist which CNN checkpoint was used to fit CRAFT (for later rebuilds)."""
+    os.makedirs(craft_dir, exist_ok=True)
+    out = os.path.join(craft_dir, BACKBONE_WEIGHTS_META)
+    payload = {
+        "backbone_weights": os.path.abspath(weights_path),
+        "backbone": backbone_name,
+    }
+    with open(out, "w") as f:
+        json.dump(payload, f, indent=2)
+    return out
+
+
+def read_backbone_weights_meta(craft_path_or_dir: str) -> Optional[str]:
+    """Return absolute backbone_weights path from CRAFT meta, or None."""
+    if not craft_path_or_dir:
+        return None
+    if os.path.isdir(craft_path_or_dir):
+        meta = os.path.join(craft_path_or_dir, BACKBONE_WEIGHTS_META)
+    else:
+        meta = os.path.join(os.path.dirname(craft_path_or_dir), BACKBONE_WEIGHTS_META)
+    if not os.path.isfile(meta):
+        return None
+    with open(meta, "r") as f:
+        payload = json.load(f)
+    path = payload.get("backbone_weights")
+    if not path:
+        return None
+    if not os.path.isfile(path):
+        raise FileNotFoundError(
+            f"{meta} points to missing backbone weights: {path}"
+        )
+    return path
+
+
+def resolve_backbone_weights(explicit: Optional[str],
+                             craft_path_or_dir: Optional[str] = None
+                             ) -> Optional[str]:
+    """Prefer explicit CLI path; else CRAFT-side meta written at fit time."""
+    if explicit:
+        return explicit
+    return read_backbone_weights_meta(craft_path_or_dir) if craft_path_or_dir else None
+
+
 def build_model_parts(backbone_name: str = "resnet50",
                       device: str = "cuda",
-                      pretrained: bool = True) -> Tuple[nn.Module, nn.Module]:
+                      pretrained: bool = True,
+                      backbone_weights: Optional[str] = None
+                      ) -> Tuple[nn.Module, nn.Module]:
     """Return (g, h): g maps images to a spatial feature map; h maps that map to logits.
 
     Supported: resnet18, resnet50, densenet201, mobilenet_v2.
+
+    backbone_weights:
+      Optional path to a fine-tuned CNN checkpoint from ``train_cnn``
+      (``{dataset}_{backbone}_cnn.pt``). When set, those weights replace the
+      default ImageNet / pytorchcv init. When None (default), behaviour is
+      unchanged.
     """
     backbone_name = backbone_name.lower()
+    use_pretrained = bool(pretrained) and not backbone_weights
+
     if backbone_name == "resnet18":
         from pytorchcv.model_provider import get_model as ptcv_get_model
 
@@ -27,24 +176,29 @@ def build_model_parts(backbone_name: str = "resnet50",
             os.environ.get("TORCH_HOME", os.path.expanduser("~/.torch")),
             "pytorchcv",
         )
-        net = ptcv_get_model("resnet18_cub", pretrained=pretrained, root=ptcv_root)
+        net = ptcv_get_model("resnet18_cub", pretrained=use_pretrained, root=ptcv_root)
+        if backbone_weights:
+            load_weights_into_backbone(net, backbone_name, backbone_weights)
         g = nn.Sequential(*list(net.features.children())[:-1]).to(device).eval()
         fc = net.output
         h = lambda x, _fc=fc: _fc(torch.mean(x, (2, 3)))
         return g, h
 
     elif backbone_name == "resnet50":
-        weights = models.ResNet50_Weights.DEFAULT if pretrained else None
+        weights = models.ResNet50_Weights.DEFAULT if use_pretrained else None
         model = models.resnet50(weights=weights)
+        if backbone_weights:
+            load_weights_into_backbone(model, backbone_name, backbone_weights)
         g = nn.Sequential(*list(model.children())[:-2]).to(device).eval()
         fc = model.fc
         h = lambda x, _fc=fc: _fc(torch.mean(x, (2, 3)))
         return g, h
 
     elif backbone_name == "densenet201":
-        import torch.nn.functional as _F
-        weights = models.DenseNet201_Weights.DEFAULT if pretrained else None
+        weights = models.DenseNet201_Weights.DEFAULT if use_pretrained else None
         model = models.densenet201(weights=weights)
+        if backbone_weights:
+            load_weights_into_backbone(model, backbone_name, backbone_weights)
         # DenseNet features end in BatchNorm (can be negative); CRAFT NMF needs
         # non-negative maps, so append ReLU on g and use the same for h's input.
         g = nn.Sequential(model.features, nn.ReLU(inplace=False)).to(device).eval()
@@ -53,8 +207,10 @@ def build_model_parts(backbone_name: str = "resnet50",
         return g, h
 
     elif backbone_name == "mobilenet_v2":
-        weights = models.MobileNet_V2_Weights.DEFAULT if pretrained else None
+        weights = models.MobileNet_V2_Weights.DEFAULT if use_pretrained else None
         model = models.mobilenet_v2(weights=weights)
+        if backbone_weights:
+            load_weights_into_backbone(model, backbone_name, backbone_weights)
         g = model.features.to(device).eval()
         classifier = model.classifier
         h = lambda x, _clf=classifier: _clf(x.mean([2, 3]))

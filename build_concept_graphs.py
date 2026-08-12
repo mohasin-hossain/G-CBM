@@ -8,7 +8,15 @@ import numpy as np
 import torch
 from PIL import Image as PILImage
 from utils import _save_concepts, _reverse_preprocess
-from concepts import build_model_parts, fit_craft_for_k, auto_select_k, save_craft_light, write_best_k
+from concepts import (
+    build_model_parts,
+    fit_craft_for_k,
+    auto_select_k,
+    save_craft_light,
+    write_best_k,
+    write_backbone_weights_meta,
+    resolve_backbone_weights,
+)
 from config import DATASETS, default_output_dir
 
 def parse_args():
@@ -20,6 +28,11 @@ def parse_args():
     p.add_argument("--output-root", default=default_output_dir)
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     p.add_argument("--backbone", default="resnet50")
+    p.add_argument(
+        "--backbone-weights", default=None,
+        help="Optional fine-tuned CNN .pt from train_cnn. Default: ImageNet / "
+             "pytorchcv weights. Unset keeps existing pipelines unchanged.",
+    )
     p.add_argument("--n-components", type=int, default=10)
     p.add_argument("--batch-size", type=int, default=64, help="CRAFT fitting batch size")
     p.add_argument("--auto-n-components", action="store_true",
@@ -100,7 +113,10 @@ def main():
         images_nmf, labels_nmf, _ = ds_spec.load_split(paths, tdict, split="nmf")
         if images_nmf.numel() == 0:
             raise RuntimeError("Loaded 0 images for NMF. Check CSV paths in config.py.")
-        g, h = build_model_parts(args.backbone, device=args.device, pretrained=True)
+        g, h = build_model_parts(
+            args.backbone, device=args.device, pretrained=True,
+            backbone_weights=args.backbone_weights,
+        )
 
         if args.auto_n_components and args.candidates:
             best_k, table = auto_select_k(
@@ -131,6 +147,10 @@ def main():
         save_craft_light(craft, default_craft_file)
         _save_concepts(crops, crops_u, reverse=True, start=0, nb_crops=5, save=True, save_dir=concept_example_save_dir)
         print(f"Saved Craft (light) to: {default_craft_file}")
+        if args.backbone_weights:
+            meta = write_backbone_weights_meta(
+                craft_dir, args.backbone_weights, args.backbone)
+            print(f"Saved backbone-weights meta: {meta}")
 
         if args.save_individual_crops:
             save_individual_concept_crops(
@@ -165,6 +185,7 @@ def main():
                 continue
 
             out_file = os.path.join(graphs_dir, f"concept_graphs_{'validation' if split=='val' else split}.dgl")
+            bw = resolve_backbone_weights(args.backbone_weights, craft_path)
             out_file, n_graphs = build_and_save_graphs_per_split(
                 images=images_s,
                 labels=labels_s,
@@ -177,6 +198,7 @@ def main():
                 ignore_list=[],
                 coverage_threshold=0.0,
                 sim_threshold=args.sim_threshold,
+                backbone_weights=bw,
             )
             print(f"  Saved {n_graphs} graphs to: {out_file}")
 
